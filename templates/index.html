@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>System Monitoring Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            text-align: center;
+            padding: 50px;
+        }
+        h1 {
+            font-size: 3em;
+            color: #00d2ff;
+            margin-bottom: 40px;
+            letter-spacing: 1px;
+        }
+        .plotly-graph-div {
+            margin: 20px auto;
+            width: 60%;
+            padding: 30px;
+            background-color: #2e2e2e;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .plotly-graph-div:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.5);
+        }
+        .alert {
+            padding: 15px;
+            background-color: #ff5f5f;
+            color: white;
+            margin-top: 20px;
+            font-size: 1.5em;
+            border-radius: 8px;
+            display: inline-block;
+            animation: alertFade 1s ease-out forwards;
+        }
+        @keyframes alertFade {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>System Monitoring Dashboard</h1>
+        
+        <div id="cpu-gauge" class="plotly-graph-div"></div>
+        <div id="mem-gauge" class="plotly-graph-div"></div>
+        
+        {% if message %}
+        <div class="alert">{{ message }}</div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Enhanced CPU Gauge
+        var cpuGauge = {
+            type: "indicator",
+            mode: "gauge+number+delta",
+            value: {{ cpu_metric }},
+            delta: { reference: 50, increasing: { color: "#ff5f5f" } },
+            gauge: {
+                axis: { range: [null, 100], tickwidth: 1, tickcolor: "#00d2ff" },
+                bar: { color: "#00d2ff" },
+                steps: [
+                    { range: [0, 50], color: "#00b289" },
+                    { range: [50, 85], color: "#ffeb84" },
+                    { range: [85, 100], color: "#ff5f5f" }
+                ],
+                threshold: {
+                    line: { color: "#ff5f5f", width: 4 },
+                    thickness: 0.75,
+                    value: {{ cpu_metric }}
+                }
+            }
+        };
+
+        // Enhanced Memory Gauge
+        var memGauge = {
+            type: "indicator",
+            mode: "gauge+number+delta",
+            value: {{ mem_metric }},
+            delta: { reference: 50, increasing: { color: "#ff5f5f" } },
+            gauge: {
+                axis: { range: [null, 100], tickwidth: 1, tickcolor: "#00d2ff" },
+                bar: { color: "#00d2ff" },
+                steps: [
+                    { range: [0, 50], color: "#00b289" },
+                    { range: [50, 85], color: "#ffeb84" },
+                    { range: [85, 100], color: "#ff5f5f" }
+                ],
+                threshold: {
+                    line: { color: "#ff5f5f", width: 4 },
+                    thickness: 0.75,
+                    value: {{ mem_metric }}
+                }
+            }
+        };
+
+        var cpuGaugeLayout = {
+            title: { text: "CPU Utilization", font: { size: 24, color: "#ffffff" } },
+            paper_bgcolor: "#1e1e1e",
+            plot_bgcolor: "#1e1e1e",
+            margin: { t: 60 }
+        };
+
+        var memGaugeLayout = {
+            title: { text: "Memory Utilization", font: { size: 24, color: "#ffffff" } },
+            paper_bgcolor: "#1e1e1e",
+            plot_bgcolor: "#1e1e1e",
+            margin: { t: 60 }
+        };
+
+        Plotly.newPlot('cpu-gauge', [cpuGauge], cpuGaugeLayout);
+        Plotly.newPlot('mem-gauge', [memGauge], memGaugeLayout);
+    </script>
+</body>
+</html>
+
+<!-- TPRORGRESS
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Monitoring Dashboard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            color: #2d87f0;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        .progress-container {
+            margin-bottom: 30px;
+        }
+        .progress-title {
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #555;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background-color: #eaeaea;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 8px;
+            background-color: #2d87f0;
+            width: 0;
+            transition: width 0.5s ease-in-out;
+        }
+        .progress-bar-fill.memory {
+            background-color: #f0b22d;
+        }
+        .progress-value {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            top: 0;
+            left: 0;
+            line-height: 30px;
+            font-weight: bold;
+            color: #fff;
+        }
+        .alert {
+            padding: 15px;
+            background-color: #f85050;
+            color: white;
+            font-size: 1.1em;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>System Monitoring</h1>
+
+        <div class="progress-container">
+            <div class="progress-title">CPU Utilization</div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" style="width: {{ cpu_metric }}%;"></div>
+                <div class="progress-value">{{ cpu_metric }}%</div>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-title">Memory Utilization</div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill memory" style="width: {{ mem_metric }}%;"></div>
+                <div class="progress-value">{{ mem_metric }}%</div>
+            </div>
+        </div>
+
+        {% if message %}
+        <div class="alert">{{ message }}</div>
+        {% endif %}
+    </div>
+</body>
+</html>
+
+-->
